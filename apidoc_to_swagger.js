@@ -152,7 +152,7 @@ function transferApidocParamsToSwaggerBody(params) {
     }
 
     let mountPlaces = {
-        '': parameter['schema']['properties']
+        '': parameter['schema']
     }
 
     params.forEach(i => {
@@ -164,13 +164,13 @@ function transferApidocParamsToSwaggerBody(params) {
         console.debug('objectName %s, propertyName %s ', objectName, propertyName);
 
         if (type.endsWith('object[]')) {
-            mountPlaces[objectName][propertyName] = { type: 'array', items: { type: 'object', properties: {}, required: [] } }
+            mountPlaces[objectName]['properties'][propertyName] = { type: 'array', items: { type: 'object', properties: {}, required: [] } }
 
             // new mount point
             console.log('due %s [%s] mount %s', key, type, propertyName);
-            mountPlaces[key] = mountPlaces[objectName][propertyName]['items']['properties']
+            mountPlaces[key] = mountPlaces[objectName]['properties'][propertyName]['items']
         } else if (type.endsWith('[]')) {
-            mountPlaces[objectName][propertyName] = {
+            mountPlaces[objectName]['properties'][propertyName] = {
                 items: {
                     type: type.slice(0, -2), description: i.description,
                     // default: i.defaultValue,
@@ -179,24 +179,21 @@ function transferApidocParamsToSwaggerBody(params) {
                 type: 'array'
             }
         } else if (type === 'object') {
-            mountPlaces[objectName][propertyName] = { type: 'object', properties: {}, required: [] }
+            mountPlaces[objectName]['properties'][propertyName] = { type: 'object', properties: {}, required: [] }
 
             // new mount point
             console.log('due %s [%s] mount %s', key, type, propertyName);
-            mountPlaces[key] = mountPlaces[objectName][propertyName]['properties']
+            mountPlaces[key] = mountPlaces[objectName]['properties'][propertyName]
         } else {
-            mountPlaces[objectName][propertyName] = {
+            mountPlaces[objectName]['properties'][propertyName] = {
                 type,
                 description: i.description,
                 default: i.defaultValue,
             }
-            // if (!i.optional) {
-            //     console.log('xxxx', mountPlaces[objectName]);
-            //     console.log('xxx', mountPlaces[objectName]['required']);
-            //     mountPlaces[objectName]['required'].push(propertyName)
-            // }
         }
-
+        if (!i.optional) {
+            mountPlaces[objectName]['required'].push(propertyName)
+        }
         console.log('mountPlaces', mountPlaces)
     })
 
