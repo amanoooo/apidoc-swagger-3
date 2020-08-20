@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var { pathToRegexp } = require('path-to-regexp');
-const { debug } = require('winston');
+const { debug, log } = require('winston');
 
 
 console.log('pathToRegexp', pathToRegexp);
@@ -69,174 +69,147 @@ function extractPaths(apidocJson) {
 
             var obj = paths[url] = paths[url] || {};
 
-            if (type == 'post' || type == 'patch' || type == 'put') {
-                _.extend(obj, createPostPushPutOutput(verb, swagger.components.schemas, pathKeys));
-            } else {
-                _.extend(obj, createGetDeleteOutput(verb, swagger.components.schemas));
-            }
+            _.extend(obj, generateParameters(verb, swagger.components))
         }
     }
     return paths;
 }
 
-function createPostPushPutOutput(verbs, definitions, pathKeys) {
-    console.log('createPostPushPutOutput', verbs, definitions, pathKeys);
-    var pathItemObject = {};
-    var verbDefinitionResult = createVerbDefinitions(verbs, definitions)
-    console.log('verbDefinitionResult', verbDefinitionResult);
+function generateParameters(verb, components) {
+    console.log('verb', verb);
 
-    var params = [];
-    var pathParams = createPathParameters(verbs, pathKeys);
-    console.log('pathParams', pathParams);
-    pathParams = _.filter(pathParams, function (param) {
-        var hasKey = pathKeys.indexOf(param.name) !== -1;
-        return !(param.in === "path" && !hasKey)
-    });
-    console.log('pathParams', pathParams);
+    const query = []
+    const body = []
+    const header = verb && verb.header && verb.header.fields.Header || []
 
-    params = params.concat(pathParams);
-    var required = verbs.parameter && verbs.parameter.fields &&
-        verbs.parameter.fields.Parameter && verbs.parameter.fields.Parameter.length > 0;
+    if (verb && verb.parameter && verb.parameter.fields) {
 
-    params.push({
-        // "in": "body",
-        // "name": "body",
-        "description": removeTags(verbs.description),
-        "required": required,
-        "schema": {
-            "$ref": "#/components/schemas/" + verbDefinitionResult.topLevelParametersRef
+        const Parameter = verb.parameter.fields.Parameter || []
+        const _query = verb.parameter.fields.Query || []
+        const _body = verb.parameter.fields.Body || []
+        query.push(..._query)
+        body.push(..._body)
+        if (verb.type === 'get') {
+            query.push(...Parameter)
+        } else {
+            body.push(...Parameter)
         }
-    });
-    console.log('params', params)
+    };
+    console.log('query', query);
+    console.log('body', body);
+    console.log('header', header);
 
-    pathItemObject[verbs.type] = {
-        tags: [verbs.group],
-        summary: removeTags(verbs.description),
+    const parameters = []
+    parameters.push(...query.map(mapQueryItem))
+    parameters.push(...header.map(mapHeaderItem))
+    parameters.push(transferApidocParamsToSwaggerBody(body))
+
+    const pathItemObject = {}
+    pathItemObject[verb.type] = {
+        tags: [verb.group],
+        summary: removeTags(verb.description),
         consumes: [
             "application/json"
         ],
         produces: [
             "application/json"
         ],
-        parameters: params
+        parameters
     }
 
-    if (verbDefinitionResult.topLevelSuccessRef) {
-        pathItemObject[verbs.type].responses = {
-            "200": {
-                "description": "successful operation",
-                "schema": {
-                    "type": verbDefinitionResult.topLevelSuccessRefType,
-                    "items": {
-                        "$ref": "#/components/schemas/" + verbDefinitionResult.topLevelSuccessRef
-                    }
-                }
-            }
-        };
-    };
+    return pathItemObject
 
-    return pathItemObject;
 }
-
-function createVerbDefinitions(verbs, definitions) {
-    var result = {
-        topLevelParametersRef: null,
-        topLevelSuccessRef: null,
-        topLevelSuccessRefType: null
-    };
-    var defaultObjectName = verbs.name;
-
-    var fieldArrayResult = {};
-    if (verbs && verbs.parameter && verbs.parameter.fields) {
-        const Parameter = verbs.parameter.fields.Parameter || []
-        const Query = verbs.parameter.fields.Query || []
-        const Body = verbs.parameter.fields.Body || []
-        fieldArrayResult = createFieldArrayDefinitions(Parameter.concat(Query, Body), definitions, verbs.name, defaultObjectName);
-        result.topLevelParametersRef = fieldArrayResult.topLevelRef;
-    };
-
-    if (verbs && verbs.success && verbs.success.fields) {
-        fieldArrayResult = createFieldArrayDefinitions(verbs.success.fields["Success 200"], definitions, verbs.name, defaultObjectName);
-        result.topLevelSuccessRef = fieldArrayResult.topLevelRef;
-        result.topLevelSuccessRefType = fieldArrayResult.topLevelRefType;
-    };
-
-    return result;
+function mapHeaderItem(i) {
+    return {
+        type: 'string',
+        in: 'header',
+        name: i.field,
+        description: removeTags(i.description),
+        required: !i.optional,
+        default: i.defaultValue
+    }
 }
-
-function createFieldArrayDefinitions(fieldArray, definitions, topLevelRef, defaultObjectName) {
-    var result = {
-        topLevelRef: topLevelRef,
-        topLevelRefType: null
+function mapQueryItem(i) {
+    return {
+        type: 'string',
+        in: 'query',
+        name: i.field,
+        description: removeTags(i.description),
+        required: !i.optional,
+        default: i.defaultValue
+    }
+}
+function transferApidocParamsToSwaggerBody(params) {
+    const parameter = {
+        name: 'root',
+        in: 'body',
+        schema: {
+            properties: {},
+            type: 'object',
+            required: []
+        }
     }
 
-    if (!fieldArray) {
-        return result;
+    let mountPlaces = {
+        '': parameter['schema']['properties']
     }
 
-    for (var i = 0; i < fieldArray.length; i++) {
-        var parameter = fieldArray[i];
-        console.log('createFieldArrayDefinitions [%d]', i, parameter);
+    params.forEach(i => {
+        console.debug('handle body param', i);
+        const type = i.type.toLowerCase()
+        const key = i.field
+        const nestedName = createNestedName(i.field)
+        const { objectName = '', propertyName } = nestedName
+        console.debug('objectName %s, propertyName %s ', objectName, propertyName);
 
-        const nestedName = createNestedName(parameter.field, defaultObjectName);
-        let objectName = nestedName.objectName
-        let propertyName = nestedName.propertyName
+        if (type.endsWith('object[]')) {
+            mountPlaces[objectName][propertyName] = { type: 'array', items: { type: 'object', properties: {}, required: [] } }
 
-        console.debug('nestedName', nestedName);
-
-        var type = parameter.type;
-        if (i == 0) {
-            // mark
-            result.topLevelRefType = type;
-            if (parameter.type == "Object") {
-                objectName = propertyName
-                nestedName = null
-            } else if (parameter.type == "Array") {
-                objectName = propertyName
-                propertyName = null
-                result.topLevelRefType = "array";
+            // new mount point
+            console.log('due %s [%s] mount %s', key, type, propertyName);
+            mountPlaces[key] = mountPlaces[objectName][propertyName]['items']['properties']
+        } else if (type.endsWith('[]')) {
+            mountPlaces[objectName][propertyName] = {
+                items: {
+                    type: type.slice(0, -2), description: i.description,
+                    // default: i.defaultValue,
+                    example: i.defaultValue
+                },
+                type: 'array'
             }
-            result.topLevelRef = objectName;
-        };
+        } else if (type === 'object') {
+            mountPlaces[objectName][propertyName] = { type: 'object', properties: {}, required: [] }
 
-        definitions[objectName] = definitions[objectName] ||
-            { properties: {}, required: [] };
-
-        if (propertyName) {
-            var prop = { type: (parameter.type || "").toLowerCase(), description: removeTags(parameter.description) };
-            if (parameter.type == "Object") {
-                prop.$ref = "#/definitions/" + parameter.field;
-            }
-
-            if (type.endsWith('[]')) {
-                prop.type = "array";
-                prop.items = {
-                    type: type.slice(0, type.length - 2)
-                };
-            }
-
-            console.debug('definitions[%s] add properties [%s]', objectName, propertyName)
-            definitions[objectName]['properties'][propertyName] = prop;
-            if (!parameter.optional) {
-                var arr = definitions[objectName]['required'];
-                if (arr.indexOf(propertyName) === -1) {
-                    arr.push(propertyName);
-                }
-            };
-
+            // new mount point
+            console.log('due %s [%s] mount %s', key, type, propertyName);
+            mountPlaces[key] = mountPlaces[objectName][propertyName]['properties']
         } else {
-            console.log('not exist propertyName', nestedName);
-        };
-    }
+            mountPlaces[objectName][propertyName] = {
+                type,
+                description: i.description,
+                default: i.defaultValue,
+            }
+            // if (!i.optional) {
+            //     console.log('xxxx', mountPlaces[objectName]);
+            //     console.log('xxx', mountPlaces[objectName]['required']);
+            //     mountPlaces[objectName]['required'].push(propertyName)
+            // }
+        }
 
-    return result;
+        console.log('mountPlaces', mountPlaces)
+    })
+
+    console.log('xxparameter', parameter);
+
+    return parameter
 }
+
 
 function createNestedName(field, defaultObjectName) {
     let propertyName = field;
     let objectName;
     let propertyNames = field.split(".");
-    console.debug('propertyNames', propertyNames);
     if (propertyNames && propertyNames.length > 1) {
         propertyName = propertyNames.pop();
         objectName = propertyNames.join(".");
@@ -246,73 +219,6 @@ function createNestedName(field, defaultObjectName) {
         propertyName: propertyName,
         objectName: objectName || defaultObjectName
     }
-}
-
-
-/**
- * Generate get, delete method output
- * @param verbs
- * @returns {{}}
- */
-function createGetDeleteOutput(verbs, definitions) {
-    var pathItemObject = {};
-    verbs.type = verbs.type === "del" ? "delete" : verbs.type;
-
-    var verbDefinitionResult = createVerbDefinitions(verbs, definitions);
-    pathItemObject[verbs.type] = {
-        tags: [verbs.group],
-        summary: removeTags(verbs.description),
-        consumes: [
-            "application/json"
-        ],
-        produces: [
-            "application/json"
-        ],
-        parameters: createPathParameters(verbs)
-    }
-    if (verbDefinitionResult.topLevelSuccessRef) {
-        pathItemObject[verbs.type].responses = {
-            "200": {
-                "description": "successful operation",
-                "schema": {
-                    "type": verbDefinitionResult.topLevelSuccessRefType,
-                    "items": {
-                        "$ref": "#/components/schemas/" + verbDefinitionResult.topLevelSuccessRef
-                    }
-                }
-            }
-        };
-    };
-    return pathItemObject;
-}
-
-/**
- * Iterate through all method parameters and create array of parameter objects which are stored as path parameters
- * @param verbs
- * @returns {Array}
- */
-function createPathParameters(verbs, pathKeys) {
-    pathKeys = pathKeys || [];
-
-    var pathItemObject = [];
-    if (verbs.parameter && verbs.parameter.fields.Parameter) {
-
-        for (var i = 0; i < verbs.parameter.fields.Parameter.length; i++) {
-            var param = verbs.parameter.fields.Parameter[i];
-            console.log('param', param);
-            var field = param.field;
-            var type = param.type;
-            pathItemObject.push({
-                name: field,
-                in: type === "file" ? "formData" : "path",
-                required: !param.optional,
-                type: param.type.toLowerCase(),
-                description: removeTags(param.description)
-            });
-
-        }
-    }
-    return pathItemObject;
 }
 
 function groupByUrl(apidocJson) {
