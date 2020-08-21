@@ -1,0 +1,224 @@
+{
+    "swagger": "3.0",
+    "info": {
+        "title": "",
+        "version": "0.0.0",
+        "description": ""
+    },
+    "paths": {
+        "/testget": {
+            "get": {
+                "tags": ["search"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "type": "string",
+                    "in": "query",
+                    "name": "b1",
+                    "description": "",
+                    "required": false,
+                    "default": "xxx"
+                }, {
+                    "type": "string",
+                    "in": "query",
+                    "name": "b2.b3",
+                    "description": "b2的b3",
+                    "required": true
+                }, {
+                    "type": "string",
+                    "in": "query",
+                    "name": "b",
+                    "description": "描述",
+                    "required": false,
+                    "default": "22"
+                }, {
+                    "name": "root",
+                    "in": "body",
+                    "schema": {
+                        "properties": {
+                            "b2": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            }
+                        },
+                        "type": "object",
+                        "required": ["b2"]
+                    }
+                }],
+                "responses": {}
+            }
+        },
+        "/testpost": {
+            "post": {
+                "tags": ["search"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "type": "string",
+                    "in": "query",
+                    "name": "a5",
+                    "description": "这是header描述",
+                    "required": true,
+                    "default": "a2"
+                }, {
+                    "type": "string",
+                    "in": "header",
+                    "name": "a0",
+                    "description": "这是header描述",
+                    "required": true,
+                    "default": "xx"
+                }, {
+                    "name": "root",
+                    "in": "body",
+                    "schema": {
+                        "properties": {
+                            "a1": {
+                                "type": "object",
+                                "properties": {
+                                    "a3": {
+                                        "type": "string",
+                                        "description": "a3"
+                                    },
+                                    "a2": {
+                                        "type": "object",
+                                        "properties": {
+                                            "a4": {
+                                                "type": "string",
+                                                "description": "a2object的a4属性"
+                                            }
+                                        },
+                                        "required": []
+                                    }
+                                },
+                                "required": []
+                            },
+                            "a6": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "a7": {
+                                            "items": {
+                                                "type": "string",
+                                                "description": "a6的a7"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "required": []
+                                }
+                            },
+                            "a8": {
+                                "items": {
+                                    "type": "string",
+                                    "description": "a88"
+                                },
+                                "type": "array"
+                            },
+                            "b": {
+                                "type": "number",
+                                "description": "描述",
+                                "default": "22"
+                            }
+                        },
+                        "type": "object",
+                        "required": []
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "title": "Success-Response:",
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "number"
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "itemList": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "popularSearchId": {
+                                                        "type": "number"
+                                                    },
+                                                    "searchContent": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": ["popularSearchId", "searchContent"]
+                                            }
+                                        },
+                                        "pageNum": {
+                                            "type": "number"
+                                        },
+                                        "pageSize": {
+                                            "type": "number"
+                                        },
+                                        "pages": {
+                                            "type": "number"
+                                        },
+                                        "total": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Success-Response:"
+                    },
+                    "201": {
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "title": "Success-Response:",
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "number"
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "test": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Success-Response:"
+                    },
+                    "404": {
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "title": "Success-Response:",
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "number"
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "test": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Success-Response:"
+                    }
+                }
+            }
+        }
+    }
+}

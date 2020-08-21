@@ -1,16 +1,14 @@
 var _ = require('lodash');
 var { pathToRegexp } = require('path-to-regexp');
 const { debug, log } = require('winston');
+const GenerateSchema = require('generate-schema')
 
 
 console.log('pathToRegexp', pathToRegexp);
 var swagger = {
     swagger: "3.0",
     info: {},
-    paths: {},
-    components: {
-        schemas: {}
-    }
+    paths: {}
 };
 
 function toSwagger(apidocJson, projectJson) {
@@ -69,57 +67,12 @@ function extractPaths(apidocJson) {
 
             var obj = paths[url] = paths[url] || {};
 
-            _.extend(obj, generateParameters(verb, swagger.components))
+            _.extend(obj, generateProps(verb))
         }
     }
     return paths;
 }
 
-function generateParameters(verb, components) {
-    console.log('verb', verb);
-
-    const query = []
-    const body = []
-    const header = verb && verb.header && verb.header.fields.Header || []
-
-    if (verb && verb.parameter && verb.parameter.fields) {
-
-        const Parameter = verb.parameter.fields.Parameter || []
-        const _query = verb.parameter.fields.Query || []
-        const _body = verb.parameter.fields.Body || []
-        query.push(..._query)
-        body.push(..._body)
-        if (verb.type === 'get') {
-            query.push(...Parameter)
-        } else {
-            body.push(...Parameter)
-        }
-    };
-    console.log('query', query);
-    console.log('body', body);
-    console.log('header', header);
-
-    const parameters = []
-    parameters.push(...query.map(mapQueryItem))
-    parameters.push(...header.map(mapHeaderItem))
-    parameters.push(transferApidocParamsToSwaggerBody(body))
-
-    const pathItemObject = {}
-    pathItemObject[verb.type] = {
-        tags: [verb.group],
-        summary: removeTags(verb.description),
-        consumes: [
-            "application/json"
-        ],
-        produces: [
-            "application/json"
-        ],
-        parameters
-    }
-
-    return pathItemObject
-
-}
 function mapHeaderItem(i) {
     return {
         type: 'string',
@@ -200,6 +153,95 @@ function transferApidocParamsToSwaggerBody(params) {
     console.log('xxparameter', parameter);
 
     return parameter
+}
+function generateProps(verb) {
+    // console.log('verb', verb);
+
+
+    const pathItemObject = {}
+    const parameters = generateParameters(verb)
+    const responses = generateResponses(verb)
+    pathItemObject[verb.type] = {
+        tags: [verb.group],
+        summary: removeTags(verb.description),
+        consumes: [
+            "application/json"
+        ],
+        produces: [
+            "application/json"
+        ],
+        parameters,
+        responses
+    }
+
+    return pathItemObject
+
+}
+
+function generateParameters(verb) {
+    const query = []
+    const body = []
+    const header = verb && verb.header && verb.header.fields.Header || []
+
+    if (verb && verb.parameter && verb.parameter.fields) {
+
+        const Parameter = verb.parameter.fields.Parameter || []
+        const _query = verb.parameter.fields.Query || []
+        const _body = verb.parameter.fields.Body || []
+        query.push(..._query)
+        body.push(..._body)
+        if (verb.type === 'get') {
+            query.push(...Parameter)
+        } else {
+            body.push(...Parameter)
+        }
+    };
+    // console.log('query', query);
+    // console.log('body', body);
+    // console.log('header', header);
+
+    const parameters = []
+    parameters.push(...query.map(mapQueryItem))
+    parameters.push(...header.map(mapHeaderItem))
+    parameters.push(transferApidocParamsToSwaggerBody(body))
+
+    return parameters
+}
+
+
+function generateResponses(verb) {
+    const success = verb.success
+    const responses = { 200: {} }
+    if (!success || success.examples.length === 0) return {}
+    for (const example of success.examples) {
+        console.log('example', example);
+        const { code, json } = safeParseJson(example.content)
+        const schema = GenerateSchema.json(example.title, json)
+        responses[code] = { schema, description: example.title }
+    }
+    return responses
+}
+function safeParseJson(content) {
+    console.debug('old content', content)
+    // such as  'HTTP/1.1 200 OK\n' +  '{\n' + ...
+    const leftCurlyBraceIndex = content.indexOf('{')
+    const mayCodeString = content.slice(0, leftCurlyBraceIndex)
+    const mayContentString = content.slice(leftCurlyBraceIndex)
+
+    const mayCodeSplit = mayCodeString.trim().split(' ')
+    const code = mayCodeSplit.length === 3 ? parseInt(mayCodeSplit[1]) : 200
+
+    let json = {}
+    try {
+        json = JSON.parse(mayContentString)
+    } catch (error) {
+        console.warn('parse error', error)
+    }
+
+    return {
+        code,
+        json
+    }
 }
 
 
