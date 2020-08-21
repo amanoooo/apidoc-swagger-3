@@ -4,7 +4,6 @@ const { debug, log } = require('winston');
 const GenerateSchema = require('generate-schema')
 
 
-console.log('pathToRegexp', pathToRegexp);
 var swagger = {
     swagger: "3.0",
     info: {},
@@ -114,7 +113,7 @@ function transferApidocParamsToSwaggerBody(params) {
         const key = i.field
         const nestedName = createNestedName(i.field)
         const { objectName = '', propertyName } = nestedName
-        console.debug('objectName %s, propertyName %s ', objectName, propertyName);
+        // console.debug('objectName %s, propertyName %s ', objectName, propertyName);
 
         if (type.endsWith('object[]')) {
             mountPlaces[objectName]['properties'][propertyName] = { type: 'array', items: { type: 'object', properties: {}, required: [] } }
@@ -147,10 +146,9 @@ function transferApidocParamsToSwaggerBody(params) {
         if (!i.optional) {
             mountPlaces[objectName]['required'].push(propertyName)
         }
-        console.log('mountPlaces', mountPlaces)
     })
 
-    console.log('xxparameter', parameter);
+    // console.log('xxparameter', parameter)
 
     return parameter
 }
@@ -195,10 +193,7 @@ function generateParameters(verb) {
         } else {
             body.push(...Parameter)
         }
-    };
-    // console.log('query', query);
-    // console.log('body', body);
-    // console.log('header', header);
+    }
 
     const parameters = []
     parameters.push(...query.map(mapQueryItem))
@@ -214,7 +209,6 @@ function generateResponses(verb) {
     const responses = { 200: {} }
     if (!success || success.examples.length === 0) return {}
     for (const example of success.examples) {
-        console.log('example', example);
         const { code, json } = safeParseJson(example.content)
         const schema = GenerateSchema.json(example.title, json)
         responses[code] = { schema, description: example.title }

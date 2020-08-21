@@ -15,22 +15,9 @@
                     "type": "string",
                     "in": "query",
                     "name": "b1",
-                    "description": "",
+                    "description": "desc_b1",
                     "required": false,
                     "default": "xxx"
-                }, {
-                    "type": "string",
-                    "in": "query",
-                    "name": "b2.b3",
-                    "description": "b2的b3",
-                    "required": true
-                }, {
-                    "type": "string",
-                    "in": "query",
-                    "name": "b",
-                    "description": "描述",
-                    "required": false,
-                    "default": "22"
                 }, {
                     "name": "root",
                     "in": "body",
@@ -40,8 +27,29 @@
                                 "type": "array",
                                 "items": {
                                     "type": "object",
-                                    "properties": {},
-                                    "required": []
+                                    "properties": {
+                                        "b3": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "b4": {
+                                                        "type": "number",
+                                                        "description": "desc_b2_b3_b4"
+                                                    }
+                                                },
+                                                "required": ["b4"]
+                                            }
+                                        },
+                                        "b5": {
+                                            "items": {
+                                                "type": "string",
+                                                "description": "desc_b2_b5"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "required": ["b3", "b5"]
                                 }
                             }
                         },
@@ -49,7 +57,29 @@
                         "required": ["b2"]
                     }
                 }],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "title": "Success-Response:",
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "number"
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "test": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Success-Response:"
+                    }
+                }
             }
         },
         "/testpost": {
@@ -61,14 +91,14 @@
                     "type": "string",
                     "in": "query",
                     "name": "a5",
-                    "description": "这是header描述",
+                    "description": "desc_a5_should_id_header",
                     "required": true,
-                    "default": "a2"
+                    "default": "a55"
                 }, {
                     "type": "string",
                     "in": "header",
                     "name": "a0",
-                    "description": "这是header描述",
+                    "description": "desc_a0_in_header",
                     "required": true,
                     "default": "xx"
                 }, {
@@ -79,19 +109,19 @@
                             "a1": {
                                 "type": "object",
                                 "properties": {
-                                    "a3": {
-                                        "type": "string",
-                                        "description": "a3"
-                                    },
                                     "a2": {
                                         "type": "object",
                                         "properties": {
                                             "a4": {
                                                 "type": "string",
-                                                "description": "a2object的a4属性"
+                                                "description": "desc_a1_a2_a4"
                                             }
                                         },
                                         "required": []
+                                    },
+                                    "a3": {
+                                        "type": "string",
+                                        "description": "desc_a1_a3"
                                     }
                                 },
                                 "required": []
@@ -104,7 +134,7 @@
                                         "a7": {
                                             "items": {
                                                 "type": "string",
-                                                "description": "a6的a7"
+                                                "description": "desc_a6_a7"
                                             },
                                             "type": "array"
                                         }
@@ -119,10 +149,10 @@
                                 },
                                 "type": "array"
                             },
-                            "b": {
+                            "a9": {
                                 "type": "number",
-                                "description": "描述",
-                                "default": "22"
+                                "description": "desc_a9",
+                                "default": "99"
                             }
                         },
                         "type": "object",
@@ -176,27 +206,6 @@
                         "description": "Success-Response:"
                     },
                     "201": {
-                        "schema": {
-                            "$schema": "http://json-schema.org/draft-04/schema#",
-                            "title": "Success-Response:",
-                            "type": "object",
-                            "properties": {
-                                "code": {
-                                    "type": "number"
-                                },
-                                "data": {
-                                    "type": "object",
-                                    "properties": {
-                                        "test": {
-                                            "type": "number"
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "description": "Success-Response:"
-                    },
-                    "404": {
                         "schema": {
                             "$schema": "http://json-schema.org/draft-04/schema#",
                             "title": "Success-Response:",
