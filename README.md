@@ -17,14 +17,14 @@ such as
 
 and this repo add new feature  
 
-- **import apidoc resonse example to swagger response schema**
-- **merge apidoc response schmema on apidoc response example (TODO)**
+- **support convert apidoc example to swagger schema**
+- **merge apidoc schema based on schema(converted by example)**
 - swagger.json version 3.0
 
 
 ## How It Works
 
-By putting in line comments in the source code like this in javascript, you will get `swagger.json` file which can be served to [swagger-ui](https://github.com/swagger-api/swagger-ui) to generate html overview of documentation.
+By putting in line comments in the source code like this in javascript, you will get `swagger.json` file which can be served to [swagger-ui](https://github.com/swagger-api/swagger-ui) [y-api](https://github.com/YMFE/yapi) to generate html overview of documentation.
 
 `/schema/demo.js`:
 ```js
@@ -62,3 +62,23 @@ By putting in line comments in the source code like this in javascript, you will
 
 
 it will output json [swagger.json](./doc/swagger.json)
+
+
+## Tips
+### Reuse js/ts/json file in comment
+if you dislike too long comment in js/ts file  
+you can make a mark likes **{{sample.json}}**  
+then replace it using sample.json before generating doc  
+
+`/schema/temp.js`:
+```js
+/**
+* @api {post} /test_api desc test api
+*
+* @apiParam {Number} [tar] desc_tar
+* @apiSuccess {Number} [code=1] desc_override_code
+*
+* @apiSuccessExample {json} response_desc
+* {{sample.json}}
+*/
+```

@@ -1,0 +1,18 @@
+{
+    "code": 200,
+    "data": {
+        "itemList": [{
+                "popularSearchId": 1,
+                "searchContent": "drink"
+            },
+            {
+                "popularSearchId": 2,
+                "searchContent": "food"
+            }
+        ],
+        "pageNum": 0,
+        "pageSize": 0,
+        "pages": 0,
+        "total": 0
+    }
+}
