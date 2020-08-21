@@ -1,20 +1,26 @@
 ## apidoc-swagger-3.0
 
-
-Inspired by [apidoc-swagger](https://github.com/fsbahman/apidoc-swagger)  
-the old redo may not be maintained, and not support new api-doc feature,  
-such as  
-**distinguish Query or Body in Post request**  
-and this repo add new feature  
-**import resonse example to response schema**
-
-
-
-apidoc and swagger are two nice projects which are focusing on documentation of APIs. 
+Apidoc and swagger are two nice projects which are focusing on documentation of APIs. 
 This project is a middle tier which tries to bring them together in a sense that:
 > It uses apidoc to convert inline documentation comments into json schema and later convert it to swagger json schema.
 
 Uses the [apidoc-core](https://github.com/apidoc/apidoc-core) library.
+
+## Why use it
+Inspired by [apidoc-swagger](https://github.com/fsbahman/apidoc-swagger)  
+
+The old repo may not be maintained, and not support new api-doc feature,  
+such as
+
+- **distinguish Query or Body in Post request**  
+- **@apiHeader**
+
+and this repo add new feature  
+
+- **import apidoc resonse example to swagger response schema**
+- **merge apidoc response schmema on apidoc response example (TODO)**
+- swagger.json version 3.0
+
 
 ## How It Works
 
