@@ -13,9 +13,9 @@ var swagger = {
 function toSwagger(apidocJson, projectJson) {
     swagger.info = addInfo(projectJson);
     swagger.paths = extractPaths(apidocJson);
-    for (const key in swagger) {
-        console.log('[%s] %o', key, swagger[key]);
-    }
+    // for (const key in swagger) {
+    //     console.log('[%s] %o', key, swagger[key]);
+    // }
     return swagger;
 }
 
@@ -48,8 +48,6 @@ function extractPaths(apidocJson) {
         var url = verbs[0].url;
         var pattern = pathToRegexp(url, null);
         var matches = pattern.exec(url);
-        console.log('matches', matches);
-        console.log('url', url);
 
         // Surrounds URL parameters with curly brackets -> :email with {email}
         var pathKeys = [];
@@ -58,7 +56,6 @@ function extractPaths(apidocJson) {
             url = url.replace(matches[j], "{" + key + "}");
             pathKeys.push(key);
         }
-        console.log('pathKeys', pathKeys);
 
         for (let j = 0; j < verbs.length; j++) {
             var verb = verbs[j];
@@ -92,46 +89,70 @@ function mapQueryItem(i) {
         default: i.defaultValue
     }
 }
-function transferApidocParamsToSwaggerBody(params) {
-    const parameter = {
-        name: 'root',
-        in: 'body',
-        schema: {
-            properties: {},
-            type: 'object',
-            required: []
-        }
+
+const defaultBodyParameter = {
+    // name: 'root',
+    // in: 'body',
+    schema: {
+        properties: {},
+        type: 'object',
+        required: []
     }
+}
+
+/**
+ * apiDocParams
+ * @param {type} type
+ * @param {boolean} optional
+ * @param {string} field
+ * @param {string} defaultValue
+ * @param {string} description
+ */
+
+/**
+ * 
+ * @param {ApidocParameter[]} apiDocParams 
+ * @param {*} parameter 
+ */
+function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
 
     let mountPlaces = {
-        '': parameter['schema']
+        '': parameterInBody['schema']
     }
 
-    params.forEach(i => {
-        console.debug('handle body param', i);
+    apiDocParams.forEach(i => {
         const type = i.type.toLowerCase()
         const key = i.field
         const nestedName = createNestedName(i.field)
         const { objectName = '', propertyName } = nestedName
-        // console.debug('objectName %s, propertyName %s ', objectName, propertyName);
 
         if (type.endsWith('object[]')) {
-            mountPlaces[objectName]['properties'][propertyName] = { type: 'array', items: { type: 'object', properties: {}, required: [] } }
+            // if schema(parsed from example) doesn't has this constructure, init
+            console.log('xxx', mountPlaces[objectName]['properties'][propertyName]);
+            if (!mountPlaces[objectName]['properties'][propertyName]) {
+                mountPlaces[objectName]['properties'][propertyName] = { type: 'array', items: { type: 'object', properties: {}, required: [] } }
+            }
 
             // new mount point
             console.log('due %s [%s] mount %s', key, type, propertyName);
             mountPlaces[key] = mountPlaces[objectName]['properties'][propertyName]['items']
         } else if (type.endsWith('[]')) {
-            mountPlaces[objectName]['properties'][propertyName] = {
-                items: {
-                    type: type.slice(0, -2), description: i.description,
-                    // default: i.defaultValue,
-                    example: i.defaultValue
-                },
-                type: 'array'
+            // if schema(parsed from example) doesn't has this constructure, init
+            if (!mountPlaces[objectName]['properties'][propertyName]) {
+                mountPlaces[objectName]['properties'][propertyName] = {
+                    items: {
+                        type: type.slice(0, -2), description: i.description,
+                        // default: i.defaultValue,
+                        example: i.defaultValue
+                    },
+                    type: 'array'
+                }
             }
         } else if (type === 'object') {
-            mountPlaces[objectName]['properties'][propertyName] = { type: 'object', properties: {}, required: [] }
+            // if schema(parsed from example) doesn't has this constructure, init
+            if (!mountPlaces[objectName]['properties'][propertyName]) {
+                mountPlaces[objectName]['properties'][propertyName] = { type: 'object', properties: {}, required: [] }
+            }
 
             // new mount point
             console.log('due %s [%s] mount %s', key, type, propertyName);
@@ -144,17 +165,19 @@ function transferApidocParamsToSwaggerBody(params) {
             }
         }
         if (!i.optional) {
-            mountPlaces[objectName]['required'].push(propertyName)
+            // generate-schema forget init [required]
+            if (mountPlaces[objectName]['required']) {
+                mountPlaces[objectName]['required'].push(propertyName)
+            } else {
+                mountPlaces[objectName]['required'] = [propertyName]
+            }
         }
     })
 
-    // console.log('xxparameter', parameter)
-
-    return parameter
+    return parameterInBody
 }
 function generateProps(verb) {
     // console.log('verb', verb);
-
 
     const pathItemObject = {}
     const parameters = generateParameters(verb)
@@ -177,8 +200,8 @@ function generateProps(verb) {
 }
 
 function generateParameters(verb) {
-    const query = []
-    const body = []
+    const mixedQuery = []
+    const mixedBody = []
     const header = verb && verb.header && verb.header.fields.Header || []
 
     if (verb && verb.parameter && verb.parameter.fields) {
@@ -186,37 +209,84 @@ function generateParameters(verb) {
         const Parameter = verb.parameter.fields.Parameter || []
         const _query = verb.parameter.fields.Query || []
         const _body = verb.parameter.fields.Body || []
-        query.push(..._query)
-        body.push(..._body)
+        mixedQuery.push(..._query)
+        mixedBody.push(..._body)
         if (verb.type === 'get') {
-            query.push(...Parameter)
+            mixedQuery.push(...Parameter)
         } else {
-            body.push(...Parameter)
+            mixedBody.push(...Parameter)
         }
     }
 
     const parameters = []
-    parameters.push(...query.map(mapQueryItem))
+    parameters.push(...mixedQuery.map(mapQueryItem))
     parameters.push(...header.map(mapHeaderItem))
-    parameters.push(transferApidocParamsToSwaggerBody(body))
+    parameters.push(generateRequestBody(verb, mixedBody))
+    // console.log('parameters', parameters);
 
     return parameters
 }
+function generateRequestBody(verb, mixedBody) {
+    const bodyParameter = {
+        in: 'body',
+        schema: {
+            properties: {},
+            type: 'object',
+            required: []
+        }
+    }
 
+    if (_.get(verb, 'parameter.examples.length') > 0) {
+        for (const example of verb.parameter.examples) {
+            const { code, json } = safeParseJson(example.content)
+            const schema = GenerateSchema.json(example.title, json)
+            bodyParameter.schema = schema
+            bodyParameter.description = example.title
+        }
+    }
+
+    transferApidocParamsToSwaggerBody(mixedBody, bodyParameter)
+
+    return bodyParameter
+}
 
 function generateResponses(verb) {
     const success = verb.success
-    const responses = { 200: {} }
-    if (!success || success.examples.length === 0) return {}
-    for (const example of success.examples) {
-        const { code, json } = safeParseJson(example.content)
-        const schema = GenerateSchema.json(example.title, json)
-        responses[code] = { schema, description: example.title }
+    const responses = {
+        200: {
+            schema: {
+                properties: {},
+                type: 'object',
+                required: []
+            }
+        }
     }
+    if (success && success.examples && success.examples.length > 0) {
+        for (const example of success.examples) {
+            const { code, json } = safeParseJson(example.content)
+            const schema = GenerateSchema.json(example.title, json)
+            responses[code] = { schema, description: example.title }
+        }
+
+    }
+
+    mountResponseSpecSchema(verb, responses)
+
     return responses
 }
+
+
+
+function mountResponseSpecSchema(verb, responses) {
+    // if (verb.success && verb.success['fields'] && verb.success['fields']['Success 200']) {
+    if (_.get(verb, 'success.fields.Success 200')) {
+        const apidocParams = verb.success['fields']['Success 200']
+        responses[200] = transferApidocParamsToSwaggerBody(apidocParams, responses[200])
+    }
+}
+
 function safeParseJson(content) {
-    console.debug('old content', content)
+    // console.debug('old content', content)
     // such as  'HTTP/1.1 200 OK\n' +  '{\n' + ...
     const leftCurlyBraceIndex = content.indexOf('{')
     const mayCodeString = content.slice(0, leftCurlyBraceIndex)

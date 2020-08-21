@@ -6,83 +6,7 @@
         "description": ""
     },
     "paths": {
-        "/testget": {
-            "get": {
-                "tags": ["search"],
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "parameters": [{
-                    "type": "string",
-                    "in": "query",
-                    "name": "b1",
-                    "description": "desc_b1",
-                    "required": false,
-                    "default": "xxx"
-                }, {
-                    "name": "root",
-                    "in": "body",
-                    "schema": {
-                        "properties": {
-                            "b2": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "b3": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "b4": {
-                                                        "type": "number",
-                                                        "description": "desc_b2_b3_b4"
-                                                    }
-                                                },
-                                                "required": ["b4"]
-                                            }
-                                        },
-                                        "b5": {
-                                            "items": {
-                                                "type": "string",
-                                                "description": "desc_b2_b5"
-                                            },
-                                            "type": "array"
-                                        }
-                                    },
-                                    "required": ["b3", "b5"]
-                                }
-                            }
-                        },
-                        "type": "object",
-                        "required": ["b2"]
-                    }
-                }],
-                "responses": {
-                    "200": {
-                        "schema": {
-                            "$schema": "http://json-schema.org/draft-04/schema#",
-                            "title": "Success-Response:",
-                            "type": "object",
-                            "properties": {
-                                "code": {
-                                    "type": "number"
-                                },
-                                "data": {
-                                    "type": "object",
-                                    "properties": {
-                                        "test": {
-                                            "type": "number"
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "description": "Success-Response:"
-                    }
-                }
-            }
-        },
-        "/testpost": {
+        "/test_api": {
             "post": {
                 "tags": ["search"],
                 "consumes": ["application/json"],
@@ -90,141 +14,77 @@
                 "parameters": [{
                     "type": "string",
                     "in": "query",
-                    "name": "a5",
-                    "description": "desc_a5_should_id_header",
+                    "name": "bar",
+                    "description": "desc_bar",
                     "required": true,
-                    "default": "a55"
+                    "default": "bar"
                 }, {
                     "type": "string",
                     "in": "header",
-                    "name": "a0",
-                    "description": "desc_a0_in_header",
-                    "required": true,
-                    "default": "xx"
+                    "name": "taz",
+                    "description": "desc_taz",
+                    "required": false
                 }, {
-                    "name": "root",
                     "in": "body",
                     "schema": {
+                        "$schema": "http://json-schema.org/draft-04/schema#",
+                        "title": "request_desc",
+                        "type": "object",
                         "properties": {
-                            "a1": {
-                                "type": "object",
-                                "properties": {
-                                    "a2": {
-                                        "type": "object",
-                                        "properties": {
-                                            "a4": {
-                                                "type": "string",
-                                                "description": "desc_a1_a2_a4"
-                                            }
-                                        },
-                                        "required": []
-                                    },
-                                    "a3": {
-                                        "type": "string",
-                                        "description": "desc_a1_a3"
-                                    }
-                                },
-                                "required": []
+                            "keyInExample": {
+                                "type": "number"
                             },
-                            "a6": {
+                            "foo": {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
                                     "properties": {
-                                        "a7": {
-                                            "items": {
-                                                "type": "string",
-                                                "description": "desc_a6_a7"
-                                            },
-                                            "type": "array"
+                                        "foz": {
+                                            "type": "string",
+                                            "description": "desc_foo.foz"
                                         }
                                     },
-                                    "required": []
+                                    "required": ["foz"]
                                 }
                             },
-                            "a8": {
-                                "items": {
-                                    "type": "string",
-                                    "description": "a88"
-                                },
-                                "type": "array"
-                            },
-                            "a9": {
+                            "tar": {
                                 "type": "number",
-                                "description": "desc_a9",
-                                "default": "99"
+                                "description": "desc_tar"
                             }
                         },
-                        "type": "object",
-                        "required": []
-                    }
+                        "required": ["foo"]
+                    },
+                    "description": "request_desc"
                 }],
                 "responses": {
                     "200": {
                         "schema": {
                             "$schema": "http://json-schema.org/draft-04/schema#",
-                            "title": "Success-Response:",
+                            "title": "response_desc",
                             "type": "object",
                             "properties": {
                                 "code": {
-                                    "type": "number"
+                                    "type": "number",
+                                    "description": "desc_override_code",
+                                    "default": "1"
                                 },
                                 "data": {
                                     "type": "object",
                                     "properties": {
-                                        "itemList": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "popularSearchId": {
-                                                        "type": "number"
-                                                    },
-                                                    "searchContent": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": ["popularSearchId", "searchContent"]
-                                            }
-                                        },
-                                        "pageNum": {
+                                        "keyInExample": {
                                             "type": "number"
                                         },
-                                        "pageSize": {
-                                            "type": "number"
-                                        },
-                                        "pages": {
-                                            "type": "number"
-                                        },
-                                        "total": {
-                                            "type": "number"
+                                        "keyInDoc": {
+                                            "type": "number",
+                                            "description": "desc_add_extra_data_key_in_doc"
                                         }
-                                    }
+                                    },
+                                    "required": ["keyInDoc"]
                                 }
-                            }
+                            },
+                            "required": ["data"]
                         },
-                        "description": "Success-Response:"
-                    },
-                    "201": {
-                        "schema": {
-                            "$schema": "http://json-schema.org/draft-04/schema#",
-                            "title": "Success-Response:",
-                            "type": "object",
-                            "properties": {
-                                "code": {
-                                    "type": "number"
-                                },
-                                "data": {
-                                    "type": "object",
-                                    "properties": {
-                                        "test": {
-                                            "type": "number"
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "description": "Success-Response:"
+                        "description": "response_desc"
                     }
                 }
             }

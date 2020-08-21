@@ -22,7 +22,6 @@ apidoc.setGeneratorInfos({ name: 'name', time: new Date(), version: '0.0.1', url
 
 
 function main(options) {
-    console.log('options', options);
 
     const { src, dest, verbose } = options
     const log = generateLog(options)
@@ -34,17 +33,17 @@ function main(options) {
     if (options.parse !== true) {
         var apidocData = JSON.parse(api.data);
         var projectData = JSON.parse(api.project);
-        let index = 0
-        for (const apidoc of apidocData) {
-            for (const key in apidoc) {
-                if (apidoc.hasOwnProperty(key)) {
-                    console.log('apidoc[%d] [%s] %o', index, key, apidoc[key]);
-                }
-            }
-            index++
-        }
+        // let index = 0
+        // for (const apidoc of apidocData) {
+        //     for (const key in apidoc) {
+        //         if (apidoc.hasOwnProperty(key)) {
+        //             console.log('apidoc[%d] [%s] %o', index, key, apidoc[key]);
+        //         }
+        //     }
+        //     index++
+        // }
 
-        console.log('projectData %o', projectData);
+        // console.debug('projectData %o', projectData);
         const swagger = apidoc_to_swagger.toSwagger(apidocData, projectData)
         // for (const key in swagger) {
         // console.info('[%s] %o', key, swagger[key]);
@@ -63,7 +62,6 @@ function createOutputFile(api, options, log) {
         log.warn('!!! Simulation !!! No file or dir will be copied or created.');
         return
     }
-    console.log('options.dest', options.dest);
 
     const dir = path.join(__dirname, options.dest)
     fs.existsSync(dir) || fs.mkdirSync(path.join(__dirname, options.dest));
@@ -74,7 +72,6 @@ function createOutputFile(api, options, log) {
     const newData = `"${api.swaggerData.replace(/"/g, "\\\"")}"`
 
     fs.writeFileSync(path.join(__dirname, options.dest, './swagger.json'), api.swaggerData);
-    fs.writeFileSync(path.join(__dirname, options.dest, './swagger.text'), newData);
 }
 
 exports.main = main

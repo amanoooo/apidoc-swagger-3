@@ -28,7 +28,6 @@ program.parse(process.argv);
 
 const { verbose, input, output, debug, color, parsee, simulate } = program
 
-console.log('parsee', parsee);
 const options = {
     src: input, dest: output, verbose, color, parse: parsee, simulate
 }
