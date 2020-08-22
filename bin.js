@@ -16,11 +16,21 @@ const commander = require('commander'); // include commander in git clone of com
 const program = new commander.Command();
 
 program
-    .option('-v, --verbose', 'erbose debug output.', false)
-    .option('-i, --input <string[]>', 'input dir', [])
+    .option('-i, --input <string[]>', 'input dir', collect, [])
     .option('-o, --output <string>', 'enable verbose', 'doc')
+    .option('-c, --config <config>', 'Path to config file or to directory containing config file (apidoc.json or apidoc.config.js).', '')
+
+    .option('--definitions', 'Include definitions file rather than copying definitions.', false)
+
+    .option('-p, --private', 'Include private APIs in output.', false)
+
+    .option('-v, --verbose', 'Verbose debug output.', false)
+
     .option('-d, --debug', 'Show debug messages.', false)
-    .option('-c, --color', 'Show color', true)
+
+    .option('--color', 'Turn off log color.', true)
+
+    // .option('--parse', 'Parse only the files and return the data, no file creation.', false)
     .option('-p, --parsee', 'Parse only the files and return the data, no file creation', false)
     .option('-s, --simulate', 'Execute but not write any file.', false)
 
@@ -32,6 +42,18 @@ const options = {
     src: input, dest: output, verbose, color, parse: parsee, simulate
 }
 console.log('options', options);
+
+
+/**
+ * Collect options into an array
+ * @param {String} value
+ * @param {String[]} acc
+ * @returns {String[]}
+ */
+function collect(value, acc) {
+    acc.push(value);
+    return acc;
+}
 
 const { main } = require('./lib')
 
