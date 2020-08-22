@@ -1,6 +1,6 @@
 {
     "name": "apidoc-swagger-3",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Convert api doc json to swagger3 json",
     "author": "amano hikaru",
     "main": "bin.js",
