@@ -9,6 +9,8 @@
         "/test_api": {
             "post": {
                 "tags": ["search"],
+                "summary": "test_api_name",
+                "description": "desc_test_api",
                 "consumes": ["application/json"],
                 "produces": ["application/json"],
                 "parameters": [{

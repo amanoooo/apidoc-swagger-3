@@ -1,6 +1,6 @@
 /**
-* @api {post} /test_api desc test api
-* @apiName post_name
+* @api {post} /test_api desc_test_api
+* @apiName test_api_name
 * @apiGroup search
 *
 * @apiHeader {String} [taz] desc_taz

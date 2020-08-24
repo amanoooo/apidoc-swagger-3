@@ -1,4 +1,4 @@
-all : api sync
+all : api
 
 api :
 	./bin.js -d -v -i schema

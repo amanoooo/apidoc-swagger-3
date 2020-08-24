@@ -14,6 +14,7 @@ such as
 
 - **distinguish Query or Body in Post request**  
 - **@apiHeader**
+- **old repo not suppport multi inputDirs**
 
 and this repo add new feature  
 

@@ -181,7 +181,8 @@ function generateProps(verb) {
     const responses = generateResponses(verb)
     pathItemObject[verb.type] = {
         tags: [verb.group],
-        summary: removeTags(verb.description),
+        summary: removeTags(verb.name),
+        description: removeTags(verb.title),
         consumes: [
             "application/json"
         ],
