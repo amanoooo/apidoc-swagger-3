@@ -4,6 +4,7 @@
     "description": "Convert api doc json to swagger3 json",
     "author": "amano hikaru",
     "main": "bin.js",
+    "bin": "bin.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/amanoooo/apidoc-swagger-3"

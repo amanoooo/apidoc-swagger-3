@@ -128,13 +128,11 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
 
         if (type.endsWith('object[]')) {
             // if schema(parsed from example) doesn't has this constructure, init
-            console.log('xxx', mountPlaces[objectName]['properties'][propertyName]);
             if (!mountPlaces[objectName]['properties'][propertyName]) {
                 mountPlaces[objectName]['properties'][propertyName] = { type: 'array', items: { type: 'object', properties: {}, required: [] } }
             }
 
             // new mount point
-            console.log('due %s [%s] mount %s', key, type, propertyName);
             mountPlaces[key] = mountPlaces[objectName]['properties'][propertyName]['items']
         } else if (type.endsWith('[]')) {
             // if schema(parsed from example) doesn't has this constructure, init
@@ -155,7 +153,6 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
             }
 
             // new mount point
-            console.log('due %s [%s] mount %s', key, type, propertyName);
             mountPlaces[key] = mountPlaces[objectName]['properties'][propertyName]
         } else {
             mountPlaces[objectName]['properties'][propertyName] = {
