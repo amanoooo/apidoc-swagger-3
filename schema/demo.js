@@ -11,9 +11,7 @@
 * @apiParam (Query) {String} bar=bar desc_bar
 *
 * @apiParamExample {json} request_desc
-*     {
-*       "keyInExample": 4711
-*     }
+* {{extraExample}}
 *
 * @apiSuccess {Number} [code=1] desc_override_code
 * @apiSuccess {Object} data data_desc
@@ -22,9 +20,13 @@
 * @apiSuccessExample {json} response_desc
 * HTTP/1.1 200 OK
 *  {
-*   "code": 200,
+   "code": 200,
     "data": {
         "keyInExample": 1
   }
 }
+*
+* @apiSuccessExample {json} error_desc
+* HTTP/1.1 300 OK
+* {{fooInJs:barInJs}}
 */

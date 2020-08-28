@@ -65,21 +65,5 @@ By putting in line comments in the source code like this in javascript, you will
 it will output json [swagger.json](./doc/swagger.json)
 
 
-## Tips
-### Reuse js/ts/json file in comment
-if you dislike too long comment in js/ts file  
-you can make a mark likes **{{sample.json}}**  
-then replace it using sample.json before generating doc  
-
-`/schema/temp.js`:
-```js
-/**
-* @api {post} /test_api desc test api
-*
-* @apiParam {Number} [tar] desc_tar
-* @apiSuccess {Number} [code=1] desc_override_code
-*
-* @apiSuccessExample {json} response_desc
-* {{sample.json}}
-*/
-```
+## Source
+* [apiHooksExample](https://github.com/apidoc/apidoc-plugin-test)

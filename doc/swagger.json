@@ -33,8 +33,16 @@
                         "title": "request_desc",
                         "type": "object",
                         "properties": {
-                            "keyInExample": {
+                            "code": {
                                 "type": "number"
+                            },
+                            "data": {
+                                "type": "object",
+                                "properties": {
+                                    "keyInExtraExample": {
+                                        "type": "number"
+                                    }
+                                }
                             },
                             "foo": {
                                 "type": "array",
@@ -87,6 +95,19 @@
                             "required": ["data"]
                         },
                         "description": "response_desc"
+                    },
+                    "300": {
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "title": "error_desc",
+                            "type": "object",
+                            "properties": {
+                                "bazInJs": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": "error_desc"
                     }
                 }
             }

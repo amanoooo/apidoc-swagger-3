@@ -284,7 +284,6 @@ function mountResponseSpecSchema(verb, responses) {
 }
 
 function safeParseJson(content) {
-    // console.debug('old content', content)
     // such as  'HTTP/1.1 200 OK\n' +  '{\n' + ...
     const leftCurlyBraceIndex = content.indexOf('{')
     const mayCodeString = content.slice(0, leftCurlyBraceIndex)

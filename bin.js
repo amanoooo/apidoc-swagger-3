@@ -22,6 +22,7 @@ var argv = program
 
     .option('-i, --input <string[]>', 'input dir', collect, [])
     .option('-o, --output <string>', 'enable verbose', './doc/')
+    .option('--sample <string>', 'sample dir', './sample/')
     .option('-c, --config <config>', 'Path to config file or to directory containing config file (apidoc.json or apidoc.config.js).', '')
 
     .option('--definitions', 'Include definitions file rather than copying definitions.', false)
@@ -36,6 +37,13 @@ var argv = program
 
     // .option('--parse', 'Parse only the files and return the data, no file creation.', false)
     .option('-p, --parsee', 'Parse only the files and return the data, no file creation', false)
+
+    .option('--parse-filters <parse-filters>', 'Optional user defined filters. Format name=filename', collect, [])
+    .option('--parse-languages <parse-languages>', 'Optional user defined languages. Format name=filename', collect, [])
+    .option('--parse-parsers <parse-parsers>', 'Optional user defined parsers. Format name=filename', collect, [])
+    .option('--parse-workers <parse-workers>', 'Optional user defined workers. Format name=filename', collect, [])
+
+
     .option('-s, --simulate', 'Execute but not write any file.', false)
 
 program.parse(process.argv);
@@ -50,10 +58,17 @@ const options = {
     dest: argv.output,
     verbose: argv.verbose,
     debug: argv.debug,
-    colorize: argv.color,
     parse: parsee,
+
+    filters: transformToObject(argv.parseFilters),
+    languages: transformToObject(argv.parseLanguages),
+    parsers: transformToObject(argv.parseParsers),
+    workers: transformToObject(argv.parseWorkers),
+
+    colorize: argv.color,
     silent: argv.silent,
     simulate: argv.simulate,
+    sample: argv.sample,
 }
 
 /**
@@ -67,6 +82,29 @@ function collect(value, acc) {
     return acc;
 }
 
+/**
+ * Transform parameters to object
+ *
+ * @param {String|String[]} filters
+ * @returns {Object}
+ */
+function transformToObject(filters) {
+    if (!filters)
+        return;
+
+    if (typeof (filters) === 'string')
+        filters = [filters];
+
+    var result = {};
+    filters.forEach(function (filter) {
+        var splits = filter.split('=');
+        if (splits.length === 2) {
+            var obj = {};
+            result[splits[0]] = path.resolve(splits[1], '');
+        }
+    });
+    return result;
+}
 const { main } = require('./lib')
 
 
