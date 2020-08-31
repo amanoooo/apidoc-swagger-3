@@ -7,6 +7,9 @@ var app = {};
 let sample
 let samplePath
 
+const fs = require('fs')
+const path = require('path')
+
 module.exports = {
 
     init: function (_app) {
@@ -24,7 +27,25 @@ module.exports = {
         // Both have priority 50 so Old will be ignored and overwritten with New
         app.addHook('parser-find-elements', replaceMark, 100);
         samplePath = app.options.sample
-        sample = require(samplePath)
+        const tsFile = samplePath + 'index.ts'
+        try {
+            const { execSync } = require('child_process');
+            execSync(`npx tsc ${tsFile}`)
+            app.options.verbose && console.debug('tsc %s success', tsFile);
+        } catch (error) {
+            console.warn('[warn] tsc error', error)
+        }
+        const jsFile = path.join(process.env.PWD, samplePath + 'index.js')
+        try {
+            sample = require(jsFile)
+            app.options.verbose && console.debug('find js file in %s', jsFile);
+            if (sample.__esModule) {
+                sample = sample.default
+            }
+        } catch (error) {
+            console.warn('[warning] not found %s', jsFile)
+            sample = {}
+        }
     }
 
 };
@@ -45,45 +66,44 @@ function replaceMark(elements, element, block, filename) {
 }
 
 
-const fs = require('fs')
-const path = require('path')
+
 
 const REG = /{{[a-zA-Z_\-:]+}}/g
 
 function findValue(data) {
 
     const newData = data.replace(REG, function (_name, $1) {
-        app.log.verbose('find %s at %d', _name, $1)
+        app.options.verbose && console.debug('find %s at %d', _name, $1)
         const name = _name.replace(/[{}]/g, '')
 
         const keys = name.split(':')
         let mayValue = sample
         for (let key of keys) {
             if (mayValue && mayValue.hasOwnProperty(key)) {
-                app.log.verbose('has %s', key)
                 mayValue = mayValue[key]
             } else {
-                app.log.verbose('sample not has ', key)
                 mayValue = undefined
             }
         }
-        if (mayValue) return JSON.stringify(mayValue, null, 2)
+        if (mayValue) {
+            app.options.verbose && console.debug('replace %s in js file', name)
+            return JSON.stringify(mayValue, null, 2)
+        }
 
         const mayPath = `${keys.join('/')}.json`
-        app.log.verbose('try find value in mayPath %s', mayPath)
+        app.options.verbose && console.debug('try find value in mayPath %s', mayPath)
         try {
-            const json = fs.readFileSync(path.join(samplePath, mayPath), 'utf-8')
-            app.log.verbose('find json file ', path.join(samplePath, mayPath));
+            const json = fs.readFileSync(path.join(process.env.PWD, samplePath, mayPath), 'utf-8')
+            app.options.verbose && console.debug('replace %s in json file', name)
             return json
         } catch (e) {
-            app.log.verbose('fail to find json file', mayPath)
+            // console.debug('fail to find json file', mayPath)
         }
 
         // 返回默认值
-        app.log.verbose('use default value');
+        app.options.verbose && console.debug('use default value');
         return '{}';
     }
     )
-    app.log.verbose('newData', newData)
     return newData
 }
