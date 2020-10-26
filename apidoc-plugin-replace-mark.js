@@ -15,6 +15,7 @@ module.exports = {
     init: function (_app) {
         app = _app;
 
+        console.log('try add hooks');
         // Hooks
         //
         // Hooks with priority
