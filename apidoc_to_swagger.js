@@ -5,7 +5,7 @@ const GenerateSchema = require('generate-schema')
 
 
 var swagger = {
-    swagger: "3.0",
+    openapi: "3.0.0",
     info: {},
     paths: {}
 };
