@@ -35,7 +35,9 @@ function main(options) {
 
     var api = apidoc.parse({ ...app.options, log: app.options.log })
 
-    if (app.options.parse !== true) {
+    if (api === true) {
+        console.log('No input data found, check your include/exclude filters');
+    } else if (app.options.parse !== true) {
         var apidocData = JSON.parse(api.data);
         var projectData = JSON.parse(api.project);
 
