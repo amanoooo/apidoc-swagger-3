@@ -4,9 +4,9 @@ var app = {
 }
 var apidoc = require('apidoc-core')
 var winston = require('winston');
-
+const libPkg = require('./package.json');
 const apidoc_to_swagger = require('./apidoc_to_swagger');
-apidoc.setGeneratorInfos({ name: 'name', time: new Date(), version: '0.0.1', url: 'xxx url' })
+apidoc.setGeneratorInfos({ name: libPkg.name, time: new Date(), version: libPkg.version, url: libPkg.repository.url })
 
 
 function generateLog() {
