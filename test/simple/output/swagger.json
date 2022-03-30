@@ -26,14 +26,6 @@
                         "name": "id",
                         "description": "Users unique ID.",
                         "required": true
-                    },
-                    {
-                        "in": "body",
-                        "schema": {
-                            "properties": {},
-                            "type": "object",
-                            "required": []
-                        }
                     }
                 ],
                 "responses": {
