@@ -43,7 +43,6 @@ var argv = program
     .option('--parse-parsers <parse-parsers>', 'Optional user defined parsers. Format name=filename', collect, [])
     .option('--parse-workers <parse-workers>', 'Optional user defined workers. Format name=filename', collect, [])
 
-
     .option('-s, --simulate', 'Execute but not write any file.', false)
 
 program.parse(process.argv);
