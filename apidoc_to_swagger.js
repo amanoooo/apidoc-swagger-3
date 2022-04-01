@@ -25,7 +25,7 @@ function removeTags(text) {
     return text ? text.replace(tagsRegex, "") : text;
 }
 
-function addInfo(projectJson) {
+function addInfo(projectJson) {  // cf. https://swagger.io/specification/#info-object
     var info = {};
     info["title"] = projectJson.title || projectJson.name;
     info["version"] = projectJson.version;
@@ -40,7 +40,7 @@ function addInfo(projectJson) {
  * @param apidocJson
  * @returns {{}}
  */
-function extractPaths(apidocJson) {
+function extractPaths(apidocJson) {  // cf. https://swagger.io/specification/#paths-object
     var apiPaths = groupByUrl(apidocJson);
     var paths = {};
     for (var i = 0; i < apiPaths.length; i++) {
@@ -79,6 +79,7 @@ function mapHeaderItem(i) {
         default: i.defaultValue
     }
 }
+
 function mapQueryItem(i) {
     return {
         type: 'string',
@@ -87,16 +88,6 @@ function mapQueryItem(i) {
         description: removeTags(i.description),
         required: !i.optional,
         default: i.defaultValue
-    }
-}
-
-const defaultBodyParameter = {
-    // name: 'root',
-    // in: 'body',
-    schema: {
-        properties: {},
-        type: 'object',
-        required: []
     }
 }
 
@@ -174,8 +165,6 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
     return parameterInBody
 }
 function generateProps(verb) {
-    // console.log('verb', verb);
-
     const pathItemObject = {}
     const parameters = generateParameters(verb)
     const responses = generateResponses(verb)
@@ -194,7 +183,6 @@ function generateProps(verb) {
     }
 
     return pathItemObject
-
 }
 
 function generateParameters(verb) {
@@ -203,7 +191,6 @@ function generateParameters(verb) {
     const header = verb && verb.header && verb.header.fields.Header || []
 
     if (verb && verb.parameter && verb.parameter.fields) {
-
         const Parameter = verb.parameter.fields.Parameter || []
         const _query = verb.parameter.fields.Query || []
         const _body = verb.parameter.fields.Body || []
@@ -219,11 +206,14 @@ function generateParameters(verb) {
     const parameters = []
     parameters.push(...mixedQuery.map(mapQueryItem))
     parameters.push(...header.map(mapHeaderItem))
-    parameters.push(generateRequestBody(verb, mixedBody))
-    // console.log('parameters', parameters);
+    if (verb.type === 'post' || verb.type === 'put') {
+        parameters.push(generateRequestBody(verb, mixedBody))
+    }
+    parameters.push(...(verb.query || []).map(mapQueryItem))
 
     return parameters
 }
+
 function generateRequestBody(verb, mixedBody) {
     const bodyParameter = {
         in: 'body',
@@ -273,8 +263,6 @@ function generateResponses(verb) {
     return responses
 }
 
-
-
 function mountResponseSpecSchema(verb, responses) {
     // if (verb.success && verb.success['fields'] && verb.success['fields']['Success 200']) {
     if (_.get(verb, 'success.fields.Success 200')) {
@@ -304,7 +292,6 @@ function safeParseJson(content) {
         json
     }
 }
-
 
 function createNestedName(field, defaultObjectName) {
     let propertyName = field;
