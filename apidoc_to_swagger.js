@@ -273,9 +273,18 @@ function mountResponseSpecSchema(verb, responses) {
 
 function safeParseJson(content) {
     // such as  'HTTP/1.1 200 OK\n' +  '{\n' + ...
-    const leftCurlyBraceIndex = content.indexOf('{')
-    const mayCodeString = content.slice(0, leftCurlyBraceIndex)
-    const mayContentString = content.slice(leftCurlyBraceIndex)
+
+    let startingIndex = 0;
+    for (let i = 0; i < content.length; i++) {
+        const character = content[i];
+        if (character === '{' || character === '[') {
+            startingIndex = i;
+            break;
+        }
+    }
+
+    const mayCodeString = content.slice(0, startingIndex)
+    const mayContentString = content.slice(startingIndex)
 
     const mayCodeSplit = mayCodeString.trim().split(' ')
     const code = mayCodeSplit.length === 3 ? parseInt(mayCodeSplit[1]) : 200
