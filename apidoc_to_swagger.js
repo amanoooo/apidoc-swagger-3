@@ -5,7 +5,7 @@ const GenerateSchema = require('generate-schema')
 
 
 var swagger = {
-    openapi: "3.0.0",
+    openapi: "3.0.3",
     info: {},
     paths: {}
 };
@@ -82,8 +82,23 @@ function mapHeaderItem(i) {
 
 function mapQueryItem(i) {
     return {
-        type: 'string',
+        schema: {
+            type: 'string',
+        },
         in: 'query',
+        name: i.field,
+        description: removeTags(i.description),
+        required: !i.optional,
+        default: i.defaultValue
+    }
+}
+
+function mapPathItem(i) {
+    return {
+        schema: {
+            type: 'string',
+        },
+        in: 'path',
         name: i.field,
         description: removeTags(i.description),
         required: !i.optional,
@@ -108,7 +123,7 @@ function mapQueryItem(i) {
 function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
 
     let mountPlaces = {
-        '': parameterInBody['schema']
+        '': Object.values(parameterInBody.content)[0]['schema']
     }
 
     apiDocParams.forEach(i => {
@@ -172,12 +187,6 @@ function generateProps(verb) {
         tags: [verb.group],
         summary: removeTags(verb.name),
         description: removeTags(verb.title),
-        consumes: [
-            "application/json"
-        ],
-        produces: [
-            "application/json"
-        ],
         parameters,
         responses
     }
@@ -186,28 +195,24 @@ function generateProps(verb) {
 }
 
 function generateParameters(verb) {
-    const mixedQuery = []
-    const mixedBody = []
-    const header = verb && verb.header && verb.header.fields.Header || []
-
-    if (verb && verb.parameter && verb.parameter.fields) {
-        const Parameter = verb.parameter.fields.Parameter || []
-        const _query = verb.parameter.fields.Query || []
-        const _body = verb.parameter.fields.Body || []
-        mixedQuery.push(..._query)
-        mixedBody.push(..._body)
-        if (verb.type === 'get') {
-            mixedQuery.push(...Parameter)
-        } else {
-            mixedBody.push(...Parameter)
-        }
-    }
 
     const parameters = []
-    parameters.push(...mixedQuery.map(mapQueryItem))
+
+    const header = verb && verb.header && verb.header.fields.Header || []
     parameters.push(...header.map(mapHeaderItem))
-    if (verb.type === 'post' || verb.type === 'put') {
-        parameters.push(generateRequestBody(verb, mixedBody))
+
+    if (verb && verb.parameter && verb.parameter.fields) {
+
+        const _path = verb.parameter.fields.Parameter || []
+        const _query = verb.parameter.fields.Query || []
+        const _body = verb.parameter.fields.Body || []
+
+        parameters.push(..._path.map(mapPathItem))
+        parameters.push(..._query.map(mapQueryItem))
+
+        if (verb.type === 'post' || verb.type === 'put') {
+            parameters.push(generateRequestBody(verb, _body))
+        }
     }
     parameters.push(...(verb.query || []).map(mapQueryItem))
 
@@ -242,10 +247,14 @@ function generateResponses(verb) {
     const success = verb.success
     const responses = {
         200: {
-            schema: {
-                properties: {},
-                type: 'object',
-                required: []
+            content: {
+                'application/json': {
+                    schema: {
+                        properties: {},
+                        type: 'object',
+                        required: []
+                    }
+                }
             }
         }
     }
@@ -253,7 +262,16 @@ function generateResponses(verb) {
         for (const example of success.examples) {
             const { code, json } = safeParseJson(example.content)
             const schema = GenerateSchema.json(example.title, json)
-            responses[code] = { schema, description: example.title }
+            delete schema.$schema;
+            responses[code] = {
+                content: {
+                    'application/json': {
+                        example: example.content,
+                        schema
+                    }
+                },
+                description: example.title
+            }
         }
 
     }
