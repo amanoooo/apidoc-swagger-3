@@ -39,7 +39,7 @@ function main(options) {
 
     const swagger = apidoc_to_swagger.toSwagger(apidocData, projectData)
 
-    api["swaggerData"] = JSON.stringify(swagger);
+    api["swaggerData"] = JSON.stringify(swagger, null, '\t');
     createOutputFile(api.swaggerData, log, options)
 
     return swagger;
