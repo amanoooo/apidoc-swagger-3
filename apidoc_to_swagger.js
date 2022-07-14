@@ -1,8 +1,12 @@
 var _ = require('lodash');
 var { pathToRegexp } = require('path-to-regexp');
-const { debug, log } = require('winston');
-const GenerateSchema = require('generate-schema')
+const GenerateSchema = require('generate-schema');
 
+var log;
+
+function setLogger(logger) {
+    log = logger;
+}
 
 var swagger = {
     openapi: "3.0.3",
@@ -346,5 +350,5 @@ function groupByUrl(apidocJson) {
 }
 
 module.exports = {
-    toSwagger: toSwagger
+    toSwagger, setLogger
 };

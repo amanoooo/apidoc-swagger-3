@@ -1,11 +1,9 @@
 const fs = require('fs')
 const path = require('path')
-const apidoc = require('apidoc-core')
+const apidoc = require('apidoc');
 const winston = require('winston');
 
 const apidoc_to_swagger = require('./apidoc_to_swagger');
-
-apidoc.setGeneratorInfos({ name: 'name', time: new Date(), version: '0.0.1', url: 'xxx url' })
 
 
 function generateLog(options) {
@@ -25,10 +23,10 @@ function generateLog(options) {
 function main(options) {
     options.verbose && console.log('options', options);
     const log = generateLog(options)
+    apidoc_to_swagger.setLogger(log);
     const { src, dest, verbose } = options
-    apidoc.setLogger(log)
 
-    var api = apidoc.parse({ ...options, log: log })
+    var api = apidoc.createDoc({ ...options, dryRun: true });
 
     var apidocData = JSON.parse(api.data);
     var projectData = JSON.parse(api.project);
@@ -58,7 +56,7 @@ function createOutputFile(swaggerData, log, options) {
     //Write swagger
     log.verbose('write swagger json file: ' + options.dest + 'swagger.json');
     if (!options.simulate)
-        fs.writeFileSync(options.dest + './swagger.json', swaggerData);
+        fs.writeFileSync(options.dest + './oas3.json', swaggerData);
 }
 
 exports.main = main
