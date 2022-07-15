@@ -139,7 +139,8 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
         const nestedName = createNestedName(i.field)
         const { objectName = '', propertyName } = nestedName
 
-        if (!mountPlaces[objectName]['properties']) mountPlaces[objectName]['properties'] = {};
+        if (!mountPlaces[objectName]) mountPlaces[objectName] = { type: 'object', properties: {} };
+        else if (!mountPlaces[objectName]['properties']) mountPlaces[objectName]['properties'] = {};
 
         if (type === 'object[]' || type === 'array') {
             // if schema(parsed from example) doesn't has this constructure, init
@@ -315,7 +316,7 @@ function safeParseJson(content) {
     let startingIndex = 0;
     for (let i = 0; i < content.length; i++) {
         const character = content[i];
-        if (character === '{' || character === '[') {
+        if (character === '{' || character === '[' || character === '"') {
             startingIndex = i;
             break;
         }
