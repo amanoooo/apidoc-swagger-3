@@ -130,7 +130,7 @@ function mapPathItem(i) {
 function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
 
     let mountPlaces = {
-        '': Object.values(parameterInBody.content)[0]['schema']
+        '': Object.values(parameterInBody)[0]['schema']
     }
 
     apiDocParams.forEach(i => {
@@ -178,7 +178,7 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
         if (!i.optional) {
             // generate-schema forget init [required]
             if (mountPlaces[objectName]['required']) {
-                mountPlaces[objectName]['required'].push(propertyName)
+                // mountPlaces[objectName]['required'].push(propertyName)
             } else {
                 mountPlaces[objectName]['required'] = [propertyName]
             }
@@ -199,6 +199,10 @@ function generateProps(verb) {
         responses
     }
 
+    if ((verb.type === 'post' || verb.type === 'put') && verb.body) {
+        pathItemObject[verb.type].requestBody = generateRequestBody(verb, verb.body)
+    }
+
     return pathItemObject
 }
 
@@ -210,18 +214,10 @@ function generateParameters(verb) {
     parameters.push(...header.map(mapHeaderItem))
 
     if (verb && verb.parameter && verb.parameter.fields) {
-
         const _path = verb.parameter.fields.Parameter || []
-        const _query = verb.parameter.fields.Query || []
-        const _body = verb.parameter.fields.Body || []
-
         parameters.push(..._path.map(mapPathItem))
-        parameters.push(..._query.map(mapQueryItem))
-
-        if (verb.type === 'post' || verb.type === 'put') {
-            parameters.push(generateRequestBody(verb, _body))
-        }
     }
+
     parameters.push(...(verb.query || []).map(mapQueryItem))
 
     return parameters
@@ -229,11 +225,14 @@ function generateParameters(verb) {
 
 function generateRequestBody(verb, mixedBody) {
     const bodyParameter = {
-        in: 'body',
-        schema: {
-            properties: {},
-            type: 'object',
-            required: []
+        content: {
+            'application/json': {
+                schema: {
+                    properties: {},
+                    type: 'object',
+                    required: []
+                }
+            }
         }
     }
 
@@ -241,7 +240,8 @@ function generateRequestBody(verb, mixedBody) {
         for (const example of verb.parameter.examples) {
             const { code, json } = safeParseJson(example.content)
             const schema = GenerateSchema.json(example.title, json)
-            bodyParameter.schema = schema
+            delete schema.$schema;
+            bodyParameter.content['application/json'].schema = schema
             bodyParameter.description = example.title
         }
     }
@@ -306,7 +306,7 @@ function mountResponseSpecSchema(verb, responses, code2XX) {
     // if (verb.success && verb.success['fields'] && verb.success['fields']['Success 200']) {
     if (_.get(verb, 'success.fields.Success ' + code2XX)) {
         const apidocParams = verb.success['fields']['Success ' + code2XX]
-        responses[code2XX] = transferApidocParamsToSwaggerBody(apidocParams, responses[code2XX])
+        responses[code2XX] = transferApidocParamsToSwaggerBody(apidocParams, responses[code2XX].content)
     }
 }
 
