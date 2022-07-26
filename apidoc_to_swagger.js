@@ -136,8 +136,8 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
     apiDocParams.forEach(i => {
         const type = i.type.toLowerCase()
         const key = i.field
-        const nestedName = createNestedName(i.field)
-        const { objectName = '', propertyName } = nestedName
+        const nestedName = createNestedName(i.field, '')
+        const { objectName, propertyName } = nestedName
 
         if (!mountPlaces[objectName]) mountPlaces[objectName] = { type: 'object', properties: {} };
         else if (!mountPlaces[objectName]['properties']) mountPlaces[objectName]['properties'] = {};
@@ -178,7 +178,7 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
         if (!i.optional) {
             // generate-schema forget init [required]
             if (mountPlaces[objectName]['required']) {
-                // mountPlaces[objectName]['required'].push(propertyName)
+                mountPlaces[objectName]['required'].push(propertyName)
             } else {
                 mountPlaces[objectName]['required'] = [propertyName]
             }
@@ -246,7 +246,7 @@ function generateRequestBody(verb, mixedBody) {
         }
     }
 
-    transferApidocParamsToSwaggerBody(mixedBody, bodyParameter)
+    transferApidocParamsToSwaggerBody(mixedBody, bodyParameter.content)
 
     return bodyParameter
 }
@@ -348,10 +348,14 @@ function safeParseJson(content) {
 function createNestedName(field, defaultObjectName) {
     let propertyName = field;
     let objectName;
-    let propertyNames = field.split(".");
-    if (propertyNames && propertyNames.length > 1) {
-        propertyName = propertyNames.pop();
-        objectName = propertyNames.join(".");
+    if (field.includes('.')) {
+        const fieldRegex = /\.(\w+)$/;
+        propertyName = field.match(fieldRegex)[1];
+        objectName = field.replace(fieldRegex, '');
+    } else if (field.includes('[')) {
+        const fieldRegex = /\[(\w+)\]/;
+        propertyName = field.match(fieldRegex)[1];
+        objectName = field.replace(fieldRegex, '')
     }
 
     return {
