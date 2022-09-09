@@ -234,9 +234,6 @@ function generateParameters(verb) {
     const parameters = []
     parameters.push(...mixedQuery.map(mapQueryItem))
     parameters.push(...header.map(mapHeaderItem))
-    /*if (verb.type === 'post' || verb.type === 'put') {
-        parameters.push(generateRequestBody(verb, mixedBody))
-    }*/
     parameters.push(...(verb.query || []).map(mapQueryItem))
 
     return parameters
@@ -244,7 +241,6 @@ function generateParameters(verb) {
 
 function generateRequestBody(verb, mixedBody) {
     const bodyParameter = {
-       // in: 'body',
         schema: {
             properties: {},
             type: 'object',
