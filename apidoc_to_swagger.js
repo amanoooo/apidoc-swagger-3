@@ -167,6 +167,7 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
 function generateProps(verb) {
     const pathItemObject = {}
     const parameters = generateParameters(verb)
+    const body = generateBody(verb)
     const responses = generateResponses(verb)
     pathItemObject[verb.type] = {
         tags: [verb.group],
@@ -179,10 +180,37 @@ function generateProps(verb) {
             "application/json"
         ],
         parameters,
+        requestBody: {
+            content: {
+                'application/json': body
+            }
+        },
         responses
     }
 
     return pathItemObject
+}
+
+function generateBody(verb) {
+    const mixedBody = []
+
+    if (verb && verb.parameter && verb.parameter.fields) {
+        const Parameter = verb.parameter.fields.Parameter || []
+        const _body = verb.parameter.fields.Body || []
+        mixedBody.push(..._body)
+        if (verb.type === 'get') {
+
+        } else {
+            mixedBody.push(...Parameter)
+        }
+    }
+
+    let body = {}
+    if (verb.type === 'post' || verb.type === 'put') {
+        body = generateRequestBody(verb, mixedBody)
+    }
+
+    return body
 }
 
 function generateParameters(verb) {
@@ -206,9 +234,9 @@ function generateParameters(verb) {
     const parameters = []
     parameters.push(...mixedQuery.map(mapQueryItem))
     parameters.push(...header.map(mapHeaderItem))
-    if (verb.type === 'post' || verb.type === 'put') {
+    /*if (verb.type === 'post' || verb.type === 'put') {
         parameters.push(generateRequestBody(verb, mixedBody))
-    }
+    }*/
     parameters.push(...(verb.query || []).map(mapQueryItem))
 
     return parameters
@@ -216,7 +244,7 @@ function generateParameters(verb) {
 
 function generateRequestBody(verb, mixedBody) {
     const bodyParameter = {
-        in: 'body',
+       // in: 'body',
         schema: {
             properties: {},
             type: 'object',
