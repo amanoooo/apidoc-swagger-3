@@ -198,9 +198,7 @@ function generateBody(verb) {
         const Parameter = verb.parameter.fields.Parameter || []
         const _body = verb.parameter.fields.Body || []
         mixedBody.push(..._body)
-        if (verb.type === 'get') {
-
-        } else {
+        if (!(verb.type === 'get'))  {
             mixedBody.push(...Parameter)
         }
     }
