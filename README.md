@@ -61,4 +61,4 @@ By putting in line comments in the source code like this in javascript, you will
 it will output json [swagger.json](./doc/swagger.json)
 
 ## Tips
-you should always use command <pre>apidoc-openapi-3</pre> directly, if you use <pre>npx apidoc-swagger-3</pre>, this lib is not able to find hook, replacing mark would be failed
+you should always use command <pre>apidoc-openapi-3</pre> directly, if you use <pre>npx apidoc-openapi-3</pre>, this lib is not able to find hook, replacing mark would be failed
