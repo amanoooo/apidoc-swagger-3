@@ -71,23 +71,27 @@ function extractPaths(apidocJson) {  // cf. https://swagger.io/specification/#pa
 
 function mapHeaderItem(i) {
     return {
-        type: 'string',
         in: 'header',
         name: i.field,
         description: removeTags(i.description),
         required: !i.optional,
-        default: i.defaultValue
+        schema: {
+            type: 'string',
+            default: i.defaultValue
+        }
     }
 }
 
 function mapQueryItem(i) {
     return {
-        type: 'string',
         in: 'query',
         name: i.field,
         description: removeTags(i.description),
         required: !i.optional,
-        default: i.defaultValue
+        schema: {
+            type: 'string',
+            default: i.defaultValue
+        }
     }
 }
 
