@@ -1,5 +1,5 @@
 {
-    "name": "@tgeant/apidoc-openapi-3",
+    "name": "apidoc-openapi-3",
     "version": "1.0.0",
     "description": "Convert api doc json to openapi 3 json",
     "author": "tancrede GEANT",
