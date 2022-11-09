@@ -71,23 +71,27 @@ function extractPaths(apidocJson) {  // cf. https://swagger.io/specification/#pa
 
 function mapHeaderItem(i) {
     return {
-        type: 'string',
         in: 'header',
         name: i.field,
         description: removeTags(i.description),
         required: !i.optional,
-        default: i.defaultValue
+        schema: {
+            type: 'string',
+            default: i.defaultValue
+        }
     }
 }
 
 function mapQueryItem(i) {
     return {
-        type: 'string',
         in: 'query',
         name: i.field,
         description: removeTags(i.description),
         required: !i.optional,
-        default: i.defaultValue
+        schema: {
+            type: 'string',
+            default: i.defaultValue
+        }
     }
 }
 
@@ -167,6 +171,7 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
 function generateProps(verb) {
     const pathItemObject = {}
     const parameters = generateParameters(verb)
+    const body = generateBody(verb)
     const responses = generateResponses(verb)
     pathItemObject[verb.type] = {
         tags: [verb.group],
@@ -179,10 +184,35 @@ function generateProps(verb) {
             "application/json"
         ],
         parameters,
+        requestBody: {
+            content: {
+                'application/json': body
+            }
+        },
         responses
     }
 
     return pathItemObject
+}
+
+function generateBody(verb) {
+    const mixedBody = []
+
+    if (verb && verb.parameter && verb.parameter.fields) {
+        const Parameter = verb.parameter.fields.Parameter || []
+        const _body = verb.parameter.fields.Body || []
+        mixedBody.push(..._body)
+        if (!(verb.type === 'get'))  {
+            mixedBody.push(...Parameter)
+        }
+    }
+
+    let body = {}
+    if (verb.type === 'post' || verb.type === 'put') {
+        body = generateRequestBody(verb, mixedBody)
+    }
+
+    return body
 }
 
 function generateParameters(verb) {
@@ -206,9 +236,6 @@ function generateParameters(verb) {
     const parameters = []
     parameters.push(...mixedQuery.map(mapQueryItem))
     parameters.push(...header.map(mapHeaderItem))
-    if (verb.type === 'post' || verb.type === 'put') {
-        parameters.push(generateRequestBody(verb, mixedBody))
-    }
     parameters.push(...(verb.query || []).map(mapQueryItem))
 
     return parameters
@@ -216,7 +243,6 @@ function generateParameters(verb) {
 
 function generateRequestBody(verb, mixedBody) {
     const bodyParameter = {
-        in: 'body',
         schema: {
             properties: {},
             type: 'object',

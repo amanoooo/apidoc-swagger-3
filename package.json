@@ -1,16 +1,16 @@
 {
-    "name": "apidoc-swagger-3",
-    "version": "1.0.5",
-    "description": "Convert api doc json to swagger3 json",
-    "author": "amano hikaru",
+    "name": "apidoc-openapi-3",
+    "version": "1.0.0",
+    "description": "Convert api doc json to openapi 3 json",
+    "author": "tancrede GEANT",
     "main": "bin.js",
     "bin": "bin.js",
     "repository": {
         "type": "git",
-        "url": "https://github.com/amanoooo/apidoc-swagger-3"
+        "url": "https://github.com/tgeant/apidoc-swagger-3"
     },
     "bugs": {
-        "url": "https://github.com/amanoooo/apidoc-swagger-3/issues"
+        "url": "https://github.com/tgeant/apidoc-swagger-3/issues"
     },
     "keywords": [
         "api",
@@ -18,7 +18,8 @@
         "doc",
         "documentation",
         "swagger",
-        "swagger-3.0"
+        "swagger-3.0",
+        "openapi"
     ],
     "scripts": {
         "test": "jest"
