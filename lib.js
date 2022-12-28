@@ -30,6 +30,11 @@ function main(options) {
 
     var api = apidoc.parse({ ...options, log: log })
 
+    if (!api) {
+        console.log('No input data found, check your include/exclude filters');
+        return
+    }
+
     var apidocData = JSON.parse(api.data);
     var projectData = JSON.parse(api.project);
 
