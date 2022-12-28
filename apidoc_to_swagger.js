@@ -116,7 +116,7 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
     }
 
     apiDocParams.forEach(i => {
-        const type = i.type.toLowerCase()
+        const type = i.type?.toLowerCase() || ''
         const key = i.field
         const nestedName = createNestedName(i.field)
         const { objectName = '', propertyName } = nestedName

@@ -25,8 +25,12 @@
         "test": "jest"
     },
     "license": "ISC",
+    "apidoc": {
+        "title": "Custom apiDoc browser title",
+        "url": "https://api.github.com/v1"
+    },
     "dependencies": {
-        "apidoc-core": "^0.15.0",
+        "apidoc": "^0.50.5",
         "commander": "^6.0.0",
         "generate-schema": "^2.6.0",
         "lodash": "^4.17.20",

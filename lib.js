@@ -1,15 +1,16 @@
 const fs = require('fs')
 const path = require('path')
-const apidoc = require('apidoc-core')
 const winston = require('winston');
+const apidoc = require('apidoc')
+
+var app = {
+    options: {}
+}
 
 const apidoc_to_swagger = require('./apidoc_to_swagger');
 
-apidoc.setGeneratorInfos({ name: 'name', time: new Date(), version: '0.0.1', url: 'xxx url' })
-
-
 function generateLog(options) {
-    return winston.createLogger({
+    app.options.log = winston.createLogger({
         transports: [
             new (winston.transports.Console)({
                 level: options.verbose ? 'verbose' : 'info',
@@ -23,12 +24,12 @@ function generateLog(options) {
 }
 
 function main(options) {
+    app.options = options
+    app.options.verbose && console.log('options', app.options);
+    generateLog(options)
     options.verbose && console.log('options', options);
-    const log = generateLog(options)
-    const { src, dest, verbose } = options
-    apidoc.setLogger(log)
 
-    var api = apidoc.parse({ ...options, log: log })
+    var api = apidoc.createDoc({ ...app.options, log: app.options.log })
 
     if (!api) {
         console.log('No input data found, check your include/exclude filters');
@@ -43,27 +44,23 @@ function main(options) {
         if (article.name)
             article.name = article.name.replace(/(_+)/g, ' ');
     }
-
     const swagger = apidoc_to_swagger.toSwagger(apidocData, projectData)
-
-    api["swaggerData"] = JSON.stringify(swagger, null, 4);
-    createOutputFile(api.swaggerData, log, options)
+    api["swaggerData"] = JSON.stringify(swagger);
+    createOutputFile(api, app.options.log)
 
     return swagger;
 }
 
-function createOutputFile(swaggerData, log, options) {
-    if (options.simulate)
-        log.warn('!!! Simulation !!! No file or dir will be copied or created.');
-
-    log.verbose('create dir: ' + options.dest);
-    if (!options.simulate)
-        fs.existsSync(options.dest) || fs.mkdirSync(options.dest);
+function createOutputFile(api, log) {
+    log.verbose('create dir: ' + app.options.dest);
+    if (!app.options.dryRun)
+        fs.existsSync(app.options.dest) || fs.mkdirSync(app.options.dest);
 
     //Write swagger
-    log.verbose('write swagger json file: ' + options.dest + 'swagger.json');
-    if (!options.simulate)
-        fs.writeFileSync(options.dest + './swagger.json', swaggerData);
+    log.verbose('write swagger json file: ' + app.options.dest + 'swagger.json');
+    if (!app.options.dryRun)
+        fs.writeFileSync(app.options.dest + './swagger.json', api.swaggerData);
+
 }
 
 exports.main = main

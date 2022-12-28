@@ -1,9 +1,9 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "",
-        "version": "0.0.0",
-        "description": ""
+        "title": "Custom apiDoc browser title",
+        "version": "1.0.0",
+        "description": "Convert api doc json to openapi 3 json"
     },
     "paths": {
         "/user/id": {
@@ -41,11 +41,11 @@
                             "properties": {
                                 "firstname": {
                                     "type": "string",
-                                    "description": "Firstname of the User."
+                                    "description": "<p>Firstname of the User.</p>"
                                 },
                                 "lastname": {
                                     "type": "string",
-                                    "description": "Lastname of the User."
+                                    "description": "<p>Lastname of the User.</p>"
                                 }
                             },
                             "type": "object",
