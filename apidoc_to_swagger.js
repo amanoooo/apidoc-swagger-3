@@ -202,7 +202,7 @@ function generateBody(verb) {
         const Parameter = verb.parameter.fields.Parameter || []
         const _body = verb.parameter.fields.Body || []
         mixedBody.push(..._body)
-        if (!(verb.type === 'get'))  {
+        if (!(verb.type === 'get')) {
             mixedBody.push(...Parameter)
         }
     }
@@ -319,7 +319,7 @@ function safeParseJson(content) {
     try {
         json = JSON.parse(mayContentString)
     } catch (error) {
-        console.warn('parse error', error)
+        console.warn('parse %o with error', mayContentString, error)
     }
 
     return {

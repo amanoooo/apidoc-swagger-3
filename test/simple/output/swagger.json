@@ -21,13 +21,20 @@
                 ],
                 "parameters": [
                     {
-                        "type": "string",
                         "in": "query",
                         "name": "id",
                         "description": "Users unique ID.",
-                        "required": true
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {}
+                    }
+                },
                 "responses": {
                     "200": {
                         "schema": {
