@@ -2,15 +2,15 @@
     "name": "apidoc-openapi-3",
     "version": "1.0.0",
     "description": "Convert api doc json to openapi 3 json",
-    "author": "tancrede GEANT",
+    "author": "amano hikaru",
     "main": "bin.js",
     "bin": "bin.js",
     "repository": {
         "type": "git",
-        "url": "https://github.com/tgeant/apidoc-swagger-3"
+        "url": "https://github.com/amanoooo/apidoc-swagger-3"
     },
     "bugs": {
-        "url": "https://github.com/tgeant/apidoc-swagger-3/issues"
+        "url": "https://github.com/amanoooo/apidoc-swagger-3/issues"
     },
     "keywords": [
         "api",
@@ -26,7 +26,7 @@
     },
     "license": "ISC",
     "dependencies": {
-        "apidoc-core": "^0.12.0",
+        "apidoc-core": "^0.15.0",
         "commander": "^6.0.0",
         "generate-schema": "^2.6.0",
         "lodash": "^4.17.20",
@@ -34,7 +34,7 @@
         "winston": "^3.3.3"
     },
     "peerDependencies": {
-        "typescript": "^3.8.7"
+        "typescript": "^4.9.4"
     },
     "devDependencies": {
         "jest": "^27.5.1"
