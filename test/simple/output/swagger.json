@@ -41,11 +41,11 @@
                             "properties": {
                                 "firstname": {
                                     "type": "string",
-                                    "description": "<p>Firstname of the User.</p>"
+                                    "description": "Firstname of the User."
                                 },
                                 "lastname": {
                                     "type": "string",
-                                    "description": "<p>Lastname of the User.</p>"
+                                    "description": "Lastname of the User."
                                 }
                             },
                             "type": "object",

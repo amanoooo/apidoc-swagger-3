@@ -18,7 +18,5 @@ const OPTIONS = {
 test('simple file should be transformed correctly', () => {
     const generatedSwaggerData = lib.main(OPTIONS);
     const expectedSwaggerData = require('./output/swagger.json');
-    console.log('expectedSwaggerData1', generatedSwaggerData);
-    writeFileSync('xx.json', JSON.stringify(generatedSwaggerData, null, 2))
     expect(generatedSwaggerData).toEqual(expectedSwaggerData);
 });

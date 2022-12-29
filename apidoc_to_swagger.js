@@ -152,7 +152,7 @@ function transferApidocParamsToSwaggerBody(apiDocParams, parameterInBody) {
         } else {
             mountPlaces[objectName]['properties'][propertyName] = {
                 type,
-                description: i.description,
+                description: removeTags(i.description),
                 default: i.defaultValue,
             }
         }
@@ -255,7 +255,7 @@ function generateRequestBody(verb, mixedBody) {
             const { code, json } = safeParseJson(example.content)
             const schema = GenerateSchema.json(example.title, json)
             bodyParameter.schema = schema
-            bodyParameter.description = example.title
+            bodyParameter.description = removeTags(example.title)
         }
     }
 
@@ -279,7 +279,7 @@ function generateResponses(verb) {
         for (const example of success.examples) {
             const { code, json } = safeParseJson(example.content)
             const schema = GenerateSchema.json(example.title, json)
-            responses[code] = { schema, description: example.title }
+            responses[code] = { schema, description: removeTags(example.title) }
         }
 
     }
