@@ -7,7 +7,7 @@ This project is a middle tier which tries to bring them together in a sense that
 Uses the [apidoc-core](https://github.com/apidoc/apidoc-core) library.
 
 ## Why use it
-Inspired by [apidoc-swagger](https://github.com/fsbahman/apidoc-swagger-3)  
+Inspired by [apidoc-swagger](https://github.com/fsbahman/apidoc-swagger)  
 
 The old repo may not be maintained, and not support new api-doc feature
 
